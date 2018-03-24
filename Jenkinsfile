@@ -36,6 +36,6 @@ oc new-app -f ${template} -p APPLICATION_NAME=${ENV}-app -p NGINX_SERVICE_NAME=$
   }
   environment {
     namespace = 'test-20180324-2'
-    template = 'test-template.yaml';
+    template = 'test-template.yaml'
   }
 }
