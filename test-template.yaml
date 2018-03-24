@@ -80,7 +80,7 @@ objects:
     output:
       to:
         kind: ImageStreamTag
-        name: ${NGINX_SERVICE_NAME}:latest
+        name: ${NGINX_SERVICE_NAME}:${IMG_TAG}
     source:
       git:
         ref: ${SOURCE_REPOSITORY_REF}
@@ -150,7 +150,7 @@ objects:
         - ${NGINX_SERVICE_NAME}
         from:
           kind: ImageStreamTag
-          name: ${NGINX_SERVICE_NAME}:latest
+          name: ${NGINX_SERVICE_NAME}:${IMG_TAG}
       type: ImageChange
     - type: ConfigChange
 
@@ -195,7 +195,7 @@ objects:
     output:
       to:
         kind: ImageStreamTag
-        name: ${PHPFPM_SERVICE_NAME}:latest
+        name: ${PHPFPM_SERVICE_NAME}:${IMG_TAG}
     source:
       git:
         ref: ${SOURCE_REPOSITORY_REF}
@@ -265,7 +265,7 @@ objects:
         - ${PHPFPM_SERVICE_NAME}
         from:
           kind: ImageStreamTag
-          name: ${PHPFPM_SERVICE_NAME}:latest
+          name: ${PHPFPM_SERVICE_NAME}:${IMG_TAG}
       type: ImageChange
     - type: ConfigChange
 
@@ -325,3 +325,7 @@ parameters:
   name: PHPFPM_IMAGE
   required: true
   value: npoict/demo:php-fpm
+- displayName: ImageStream Tag
+  name: IMG_TAG
+  required: true
+  value: latest
