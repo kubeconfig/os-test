@@ -16,9 +16,7 @@ oc new-app -f ${template} -p APPLICATION_NAME=${ENV}-app -p NGINX_SERVICE_NAME=$
         sh '''# Cleanup
 export ENV=test
 
-oc delete all -l app=${ENV}-app -n ${namespace}
-oc delete bc ${ENV}-nginx
-oc delete bc ${ENV}-phpfpm'''
+oc delete all -l app=${ENV}-app -n ${namespace}'''
       }
     }
     stage('stage') {
@@ -34,9 +32,7 @@ oc new-app -f ${template} -p APPLICATION_NAME=${ENV}-app -p NGINX_SERVICE_NAME=$
         sh '''# Cleanup
 export ENV=staging
 
-oc delete all -l app=${ENV}-app -n ${namespace}
-oc delete bc ${ENV}-nginx
-oc delete bc ${ENV}-phpfpm'''
+oc delete all -l app=${ENV}-app -n ${namespace}'''
       }
     }
   }
