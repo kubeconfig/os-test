@@ -7,7 +7,7 @@ pipeline {
 
 export ENV=test
 
-oc new-app -f app-template.yaml -p APPLICATION_NAME=${ENV}-app -p NGINX_SERVICE_NAME=${ENV}-nginx -p PHPFPM_SERVICE_NAME=${ENV}-phpfpm -p NAMESPACE=${namespace} -p SOURCE_REPOSITORY_URL=https://github.com/ferrymanders/demo-site.git -n ${namespace} --dry-run -o yaml | oc apply -f - -n ${namespace}
+oc new-app -f ${template} -p APPLICATION_NAME=${ENV}-app -p NGINX_SERVICE_NAME=${ENV}-nginx -p PHPFPM_SERVICE_NAME=${ENV}-phpfpm -p NAMESPACE=${namespace} -p SOURCE_REPOSITORY_URL=https://github.com/ferrymanders/demo-site.git -n ${namespace} --dry-run -o yaml | oc apply -f - -n ${namespace}
 
 
 '''
@@ -21,7 +21,7 @@ oc delete all -l app=test-app -n ${namespace}
 
 export ENV=staging
 
-oc new-app -f app-template.yaml -p APPLICATION_NAME=${ENV}-app -p NGINX_SERVICE_NAME=${ENV}-nginx -p PHPFPM_SERVICE_NAME=${ENV}-phpfpm -p NAMESPACE=${namespace} -p SOURCE_REPOSITORY_URL=https://github.com/ferrymanders/demo-site.git -n ${namespace} --dry-run -o yaml | oc apply -f - -n ${namespace}
+oc new-app -f ${template} -p APPLICATION_NAME=${ENV}-app -p NGINX_SERVICE_NAME=${ENV}-nginx -p PHPFPM_SERVICE_NAME=${ENV}-phpfpm -p NAMESPACE=${namespace} -p SOURCE_REPOSITORY_URL=https://github.com/ferrymanders/demo-site.git -n ${namespace} --dry-run -o yaml | oc apply -f - -n ${namespace}
 
 
 '''
@@ -36,5 +36,6 @@ oc new-app -f app-template.yaml -p APPLICATION_NAME=${ENV}-app -p NGINX_SERVICE_
   }
   environment {
     namespace = 'test-20180324-2'
+    template = 'test-template.yaml';
   }
 }
