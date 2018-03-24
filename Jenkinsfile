@@ -45,6 +45,6 @@ oc delete all -l app=${ENV}-${app} -n ${namespace}
     oc_api = 'https://openshift-master.nosopenshifttest.os.nos.aws.npocloud.nl:8443'
     namespace = 'test-20180324-2'
     template = 'test-template.yaml'
-    github_repo = 'https://github.com/ferrymanders/demo-site.git'
+    github_repo = 'https://github.com/ferrymanders/adminer.git'
   }
 }
