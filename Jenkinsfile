@@ -9,6 +9,15 @@ oc new-app -f app-template.yaml -p APPLICATION_NAME=test-app -p NAME=nginx -p NA
 
 
 '''
+        input 'Continue?'
+      }
+    }
+    stage('stage') {
+      steps {
+        sh '''# cleanup
+oc delete all -l APPLICATION_NAME=test-app -n ferry
+oc new-app -f app-template.yaml -p APPLICATION_NAME=stage-app -p NAME=nginx -p NAMESPACE=ferry -p SOURCE_REPOSITORY_URL=https://github.com/ferrymanders/demo-site.git -n ferry --dry-run -o yaml | oc apply -f - -n ferry
+'''
       }
     }
   }
