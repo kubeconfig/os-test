@@ -17,7 +17,7 @@ oc new-app -f app-template.yaml -p APPLICATION_NAME=${ENV}-app -p NGINX_SERVICE_
     stage('stage') {
       steps {
         sh '''# cleanup
-oc delete all -l APPLICATION_NAME=test-app -n ${namespace}
+oc delete all -l app=test-app -n ${namespace}
 
 export ENV=staging
 
@@ -30,7 +30,7 @@ oc new-app -f app-template.yaml -p APPLICATION_NAME=${ENV}-app -p NGINX_SERVICE_
     }
     stage('cleanup') {
       steps {
-        sh 'oc delete all -l APPLICATION_NAME=staging-app -n ${namespace}'
+        sh 'oc delete all -l app=staging-app -n ${namespace}'
       }
     }
   }
