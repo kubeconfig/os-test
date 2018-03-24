@@ -7,7 +7,7 @@ pipeline {
 
 export ENV=test
 
-oc new-app -f app-template.yaml -p APPLICATION_NAME=${ENV}-app -p NGINX_SERVICE_NAME=${ENV}-nginx PHPFPM_SERVICE_NAME=${ENV}-phpfpm -p NAMESPACE=ferry -p SOURCE_REPOSITORY_URL=https://github.com/ferrymanders/demo-site.git -n ferry --dry-run -o yaml | oc apply -f - -n ferry
+oc new-app -f app-template.yaml -p APPLICATION_NAME=${ENV}-app -p NGINX_SERVICE_NAME=${ENV}-nginx PHPFPM_SERVICE_NAME=${ENV}-phpfpm -p NAMESPACE=${namespace} -p SOURCE_REPOSITORY_URL=https://github.com/ferrymanders/demo-site.git -n ${namespace} --dry-run -o yaml | oc apply -f - -n ${namespace}
 
 
 '''
@@ -17,15 +17,24 @@ oc new-app -f app-template.yaml -p APPLICATION_NAME=${ENV}-app -p NGINX_SERVICE_
     stage('stage') {
       steps {
         sh '''# cleanup
-oc delete all -l APPLICATION_NAME=test-app -n ferry
+oc delete all -l APPLICATION_NAME=test-app -n ${namespace}
 
 export ENV=staging
 
-oc new-app -f app-template.yaml -p APPLICATION_NAME=${ENV}-app -p NGINX_SERVICE_NAME=${ENV}-nginx PHPFPM_SERVICE_NAME=${ENV}-phpfpm -p NAMESPACE=ferry -p SOURCE_REPOSITORY_URL=https://github.com/ferrymanders/demo-site.git -n ferry --dry-run -o yaml | oc apply -f - -n ferry
+oc new-app -f app-template.yaml -p APPLICATION_NAME=${ENV}-app -p NGINX_SERVICE_NAME=${ENV}-nginx PHPFPM_SERVICE_NAME=${ENV}-phpfpm -p NAMESPACE=${namespace} -p SOURCE_REPOSITORY_URL=https://github.com/ferrymanders/demo-site.git -n ${namespace} --dry-run -o yaml | oc apply -f - -n ${namespace}
 
 
 '''
+        input 'Continue?'
       }
     }
+    stage('cleanup') {
+      steps {
+        sh 'oc delete all -l APPLICATION_NAME=staging-app -n ${namespace}'
+      }
+    }
+  }
+  environment {
+    namespace = 'test-20180324-2'
   }
 }
