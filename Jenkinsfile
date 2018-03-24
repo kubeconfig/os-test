@@ -8,7 +8,7 @@ oc login ${oc_api} --token=${oc_token} --insecure-skip-tls-verify
 '''
         sh '''# Build
 export ENV=test
-export TAG="${ENV}-${app}-${env.BUILD_NUMBER}"
+export TAG="${ENV}-${app}-${BUILD_NUMBER}"
 
 oc new-app -f ${template} -p APPLICATION_NAME=${ENV}-${app} -p IMG_TAG=${TAG} -p NGINX_SERVICE_NAME=${ENV}-nginx -p PHPFPM_SERVICE_NAME=${ENV}-phpfpm -p NAMESPACE=${namespace} -p SOURCE_REPOSITORY_URL=${github_repo} -n ${namespace} --dry-run -o yaml | oc apply -f - -n ${namespace}
 '''
@@ -23,7 +23,7 @@ oc delete all -l app=${ENV}-${app} -n ${namespace}'''
       steps {
         sh '''# Build
 export ENV=staging
-export TAG="${ENV}-${app}-${env.BUILD_NUMBER}"
+export TAG="${ENV}-${app}-${BUILD_NUMBER}"
 
 oc new-app -f ${template} -p APPLICATION_NAME=${ENV}-${app} -p IMG_TAG=${TAG} -p NGINX_SERVICE_NAME=${ENV}-nginx -p PHPFPM_SERVICE_NAME=${ENV}-phpfpm -p NAMESPACE=${namespace} -p SOURCE_REPOSITORY_URL=${github_repo} -n ${namespace} --dry-run -o yaml | oc apply -f - -n ${namespace}
 '''
