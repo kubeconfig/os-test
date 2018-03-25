@@ -10,7 +10,7 @@ oc login ${oc_api} --token=${oc_token} --insecure-skip-tls-verify
 export ENV=test
 export TAG="${ENV}-${app}-$(date +%s)"
 
-oc new-app -f ${template} -p APPLICATION_NAME=${ENV}-${app} -p IMG_TAG=${TAG} -p NAMESPACE=${namespace} -p SOURCE_REPOSITORY_URL=${github_repo} -n ${namespace} --dry-run -o yaml | oc apply -f - -n ${namespace}
+oc new-app -f ${template} -p APPLICATION_NAME=${ENV}-${app} -p IMG_TAG=${TAG} -p MYSQL_DB_SETUP=YES -p NAMESPACE=${namespace} -p SOURCE_REPOSITORY_URL=${github_repo} -n ${namespace} --dry-run -o yaml | oc apply -f - -n ${namespace}
 oc start-build ${ENV}-${app}-nginx -n ${namespace}
 oc start-build ${ENV}-${app}-phpfpm -n ${namespace}'''
         input 'Continue?'
@@ -26,7 +26,7 @@ oc delete all -l app=${ENV}-${app} -n ${namespace}'''
 export ENV=staging
 export TAG="${ENV}-${app}-$(date +%s)"
 
-oc new-app -f ${template} -p APPLICATION_NAME=${ENV}-${app} -p IMG_TAG=${TAG} -p NAMESPACE=${namespace} -p SOURCE_REPOSITORY_URL=${github_repo} -n ${namespace} --dry-run -o yaml | oc apply -f - -n ${namespace}
+oc new-app -f ${template} -p APPLICATION_NAME=${ENV}-${app} -p IMG_TAG=${TAG} -p MYSQL_DB_SETUP=YES -p NAMESPACE=${namespace} -p SOURCE_REPOSITORY_URL=${github_repo} -n ${namespace} --dry-run -o yaml | oc apply -f - -n ${namespace}
 oc start-build ${ENV}-${app}-nginx -n ${namespace}
 oc start-build ${ENV}-${app}-phpfpm -n ${namespace}'''
         input 'Continue?'
