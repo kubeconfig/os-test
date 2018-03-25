@@ -245,11 +245,9 @@ objects:
         name: ${PHPFPM_SERVICE_NAME}
       spec:
         containers:
-          env:
+          - env:
             - name: MYSQL_SETUP
               value: ${MYSQL_DB_SETUP}
-            - name: MYSQL_SETUP_LOC
-              value: ${MYSQL_DB_SETUP_LOC}
             - name: MYSQL_NAME
               value: ${MYSQL_NAME}
             - name: MYSQL_USER
@@ -260,18 +258,18 @@ objects:
               value: ${MYSQL_DB_ROOT_PASS}
             - name: MYSQL_DATABASE
               value: ${MYSQL_DB_NAME}
-          image: ${PHPFPM_IMAGE}
-          name: ${PHPFPM_SERVICE_NAME}
-          ports:
-          - containerPort: 9000
-          resources:
-            limits:
-              memory: ${MEMORY_PHPFPM_LIMIT}
-          livenessProbe:
-            tcpSocket:
-              port: 9000
-            initialDelaySeconds: 15
-            timeoutSeconds: 1
+            image: ${PHPFPM_IMAGE}
+            name: ${PHPFPM_SERVICE_NAME}
+            ports:
+            - containerPort: 9000
+            resources:
+              limits:
+                memory: ${MEMORY_PHPFPM_LIMIT}
+            livenessProbe:
+              tcpSocket:
+                port: 9000
+              initialDelaySeconds: 15
+              timeoutSeconds: 1
     triggers:
     - imageChangeParams:
         automatic: true
@@ -444,11 +442,11 @@ parameters:
 - displayName: NGINX Build Image
   name: NGINX_IMAGE
   required: true
-  value: npoict/demo:nginx
+  value: npoict/os-test:nginx
 - displayName: PHP-FPM Build Image
   name: PHPFPM_IMAGE
   required: true
-  value: npoict/demo:php-fpm
+  value: npoict/os-test:php-fpm
 - displayName: ImageStream Tag
   name: IMG_TAG
   required: true
@@ -478,5 +476,3 @@ parameters:
 - displayName: Setup MySQL from backup (set to YES to setup)
   name: MYSQL_DB_SETUP
   value: NO
-- displayName: Setup MySQL from backup (set to YES to setup)
-  name: MYSQL_DB_SETUP_LOC
