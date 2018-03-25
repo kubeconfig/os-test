@@ -477,6 +477,6 @@ parameters:
   from: '[a-zA-Z0-9]{16}'
   generate: expression
 
-- displayName: Setup MySQL from backup (set to YES to setup)
+- displayName: Setup MySQL from backup
   name: MYSQL_DB_SETUP
   value: NO
