@@ -24,6 +24,8 @@ RUN mkdir -p /e/ap/site/tmp /e/ap/site/pages /e/ap/site/logs && \
 
 COPY ./uid_entrypoint /bin/uid_entrypoint
 
+RUN chmod a+x /usr/libexec/s2i/* /bin/uid_entrypoint
+
 RUN chmod g=u /etc/passwd
 ENTRYPOINT [ "uid_entrypoint" ]
 USER 1001

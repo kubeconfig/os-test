@@ -20,6 +20,8 @@ RUN mkdir -pv /e/ap/site/tmp/sessions /e/ap/site/pages /e/ap/site/logs /e/ap/sit
 
 COPY ./uid_entrypoint /bin/uid_entrypoint
 
+RUN chmod a+x /usr/libexec/s2i/* /bin/uid_entrypoint
+
 RUN chmod g=u /etc/passwd
 ENTRYPOINT [ "uid_entrypoint" ]
 USER 1001
