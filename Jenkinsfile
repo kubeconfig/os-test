@@ -40,7 +40,7 @@ oc delete all -l app=${ENV}-${app} -n ${namespace}
   }
   environment {
     app = 'testapp'
-    oc_token = 'itT5u4nkWW9E6ED-6OlgKe12b9Yg482ACYqPY2chjP0'
+    oc_token = 'Hm_CNqc6LS7L1Z_phFa1k2ddhd4DIn0nagy8CdWQqwU'
     oc_api = 'https://openshift-master.nosopenshifttest.os.nos.aws.npocloud.nl:8443'
     namespace = 'test-20180325'
     template = 'templates/mysql-template.yaml'
