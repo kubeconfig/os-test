@@ -15,8 +15,8 @@ COPY ./s2i/bin/ /usr/libexec/s2i
 
 
 RUN mkdir -pv /e/ap/site/tmp/sessions /e/ap/site/pages /e/ap/site/logs /e/ap/site/tmp/php-fpm && \
-	chown -R 1001:0 /e/ap/site/tmp/sessions /e/ap/site/pages /e/ap/site/logs /e/ap/site/tmp/php-fpm &&\
-	chmod -R ug+rwx /e/ap/site/tmp/sessions /e/ap/site/pages /e/ap/site/logs /e/ap/site/tmp/php-fpm
+	chown -R 1001:0 /e/ap/site/tmp /e/ap/site/pages /e/ap/site/logs &&\
+	chmod -R ug+rwx /e/ap/site/tmp /e/ap/site/pages /e/ap/site/logs
 
 COPY ./uid_entrypoint /bin/uid_entrypoint
 
