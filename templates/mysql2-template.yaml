@@ -472,3 +472,7 @@ parameters:
   name: MYSQL_DB_NAME
   required: true
   value: sampledb
+- displayName: Database root password
+  name: MYSQL_DB_ROOT_PASS
+  from: '[a-zA-Z0-9]{16}'
+  generate: expression
