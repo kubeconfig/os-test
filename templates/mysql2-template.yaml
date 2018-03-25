@@ -455,28 +455,3 @@ parameters:
   name: IMG_TAG
   required: true
   value: latest
-
-- displayName: Database Hostname
-  name: MYSQL_NAME
-  from: 'mysqldb-[a-z0-9]{4}'
-  generate: expression
-- displayName: Database User
-  name: MYSQL_DB_USER
-  from: 'user[a-zA-Z0-9]{4}'
-  generate: expression
-- displayName: Database Password
-  name: MYSQL_DB_PASS
-  from: '[a-zA-Z0-9]{16}'
-  generate: expression
-- displayName: Database Name
-  name: MYSQL_DB_NAME
-  required: true
-  value: sampledb
-- displayName: Database root password
-  name: MYSQL_DB_ROOT_PASS
-  from: '[a-zA-Z0-9]{16}'
-  generate: expression
-
-- displayName: Setup MySQL from backup (set to YES to setup)
-  name: MYSQL_DB_SETUP
-  value: NO
