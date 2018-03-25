@@ -400,7 +400,6 @@ objects:
 
 
 
-
 parameters:
 - description: Application Name
   displayName: Application Name
@@ -444,7 +443,18 @@ parameters:
   generate: expression
   name: GITHUB_WEBHOOK_SECRET
 
-
+- displayName: NGINX Build Image
+  name: NGINX_IMAGE
+  required: true
+  value: npoict/os-test:nginx
+- displayName: PHP-FPM Build Image
+  name: PHPFPM_IMAGE
+  required: true
+  value: npoict/os-test:php-fpm
+- displayName: ImageStream Tag
+  name: IMG_TAG
+  required: true
+  value: latest
 
 - displayName: Database Hostname
   name: MYSQL_NAME
