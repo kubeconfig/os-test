@@ -455,3 +455,12 @@ parameters:
   name: IMG_TAG
   required: true
   value: latest
+
+- displayName: Database Hostname
+  name: MYSQL_NAME
+  from: 'mysqldb-[a-z0-9]{4}'
+  generate: expression
+- displayName: Database User
+  name: MYSQL_DB_USER
+  from: 'user[a-zA-Z0-9]{4}'
+  generate: expression
