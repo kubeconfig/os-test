@@ -20,5 +20,4 @@ sed -i -- 's#PHPFPM_BACKEND#'"${FPM}"'#g' /etc/nginx/nginx.conf
 # Building and installing application
 ##################
 echo "---> Building and installing application from source..."
-mv /tmp/src/* /e/ap/site/pages/
-
+mv /tmp/src/site/* /e/ap/site/pages/
