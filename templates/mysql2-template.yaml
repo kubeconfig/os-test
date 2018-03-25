@@ -464,3 +464,11 @@ parameters:
   name: MYSQL_DB_USER
   from: 'user[a-zA-Z0-9]{4}'
   generate: expression
+- displayName: Database Password
+  name: MYSQL_DB_PASS
+  from: '[a-zA-Z0-9]{16}'
+  generate: expression
+- displayName: Database Name
+  name: MYSQL_DB_NAME
+  required: true
+  value: sampledb
