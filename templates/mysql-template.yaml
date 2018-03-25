@@ -1,0 +1,482 @@
+# Please edit the object below. Lines beginning with a '#' will be ignored,
+# and an empty file will abort the edit. If an error occurs while saving this file will be
+# reopened with the relevant failures.
+#
+apiVersion: v1
+kind: Template
+labels:
+  template: hosting-wordpress
+message: |-
+  The following service(s) have been created in your project: ${NGINX_SERVICE_NAME}, ${PHPFPM_SERVICE_NAME}.
+
+  For more information about using this template, including OpenShift considerations, bad luck! ik ben lui.
+metadata:
+  annotations:
+    description: |-
+      Setup using nginx frontproxy and php-fpm backends.
+
+      WARNING: Any data stored will be lost upon pod destruction. Only use this template for testing.
+    iconClass: icon-wordpress
+    openshift.io/display-name: Wordpress
+    tags: quickstart,php,wordpress
+    template.openshift.io/documentation-url: https://github.com/e-h-b-o/komtnog
+    template.openshift.io/long-description: Lange omschrijving
+    template.openshift.io/provider-display-name: NPO ICT
+    template.openshift.io/support-url: https://Whelp.npoict.nl
+  name: "hosting-wordpress"
+
+objects:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Exposes and load balances the application pods
+      service.alpha.openshift.io/dependencies: '[{"name": "${PHPFPM_SERVICE_NAME}",
+        "kind": "Service"}]'
+    name: ${NGINX_SERVICE_NAME}
+    lables:
+      app: ${APPLICATION_NAME}
+  spec:
+    ports:
+    - name: web
+      port: 8080
+      targetPort: 8080
+    selector:
+      name: ${NGINX_SERVICE_NAME}
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      template.openshift.io/expose-uri: http://{.spec.host}{.spec.path}
+    name: ${NGINX_SERVICE_NAME}
+  spec:
+    host: ${APPLICATION_DOMAIN}
+    to:
+      kind: Service
+      name: ${NGINX_SERVICE_NAME}
+
+#######################
+## NGiNX Service
+#######################
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      description: Keeps track of changes in the application image
+    name: ${NGINX_SERVICE_NAME}
+    lables:
+      app: ${APPLICATION_NAME}
+
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      description: Defines how to build the application
+      template.alpha.openshift.io/wait-for-ready: "true"
+    name: ${NGINX_SERVICE_NAME}
+    lables:
+      app: ${APPLICATION_NAME}
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${NGINX_SERVICE_NAME}:${IMG_TAG}
+    source:
+      git:
+        ref: ${SOURCE_REPOSITORY_REF}
+        uri: ${SOURCE_REPOSITORY_URL}
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: DockerImage
+          name: ${NGINX_IMAGE}
+        forcePull: true
+        env:
+          - name: FPM
+            value: "${PHPFPM_SERVICE_NAME}"
+      type: Source
+    triggers:
+    - type: ConfigChange
+    - type: ImageChange
+    - type: "GitHub"
+      github:
+        secret: "${GITHUB_WEBHOOK_SECRET}"
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      description: Defines how to deploy the application server
+      template.alpha.openshift.io/wait-for-ready: "true"
+    name: ${NGINX_SERVICE_NAME}
+    labels:
+      app: ${APPLICATION_NAME}
+  spec:
+    replicas: 1
+    selector:
+      app: ${APPLICATION_NAME}
+      name: ${NGINX_SERVICE_NAME}
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          name: ${NGINX_SERVICE_NAME}
+          app: ${APPLICATION_NAME}
+        name: ${NGINX_SERVICE_NAME}
+      spec:
+        containers:
+        - env:
+          - name: PHPFPM_SERVICE_NAME
+            value: ${PHPFPM_SERVICE_NAME}
+          image: ${NGINX_IMAGE}
+          name: ${NGINX_SERVICE_NAME}
+          ports:
+          - containerPort: 8080
+          resources:
+            limits:
+              memory: ${MEMORY_LIMIT}
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ${NGINX_SERVICE_NAME}
+        from:
+          kind: ImageStreamTag
+          name: ${NGINX_SERVICE_NAME}:${IMG_TAG}
+      type: ImageChange
+    - type: ConfigChange
+
+#######################
+## PHP-FPM Service
+#######################
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Exposes the PHP-FPM server
+    name: ${PHPFPM_SERVICE_NAME}
+    lables:
+      app: ${APPLICATION_NAME}
+  spec:
+    ports:
+    - name: phpfpm
+      port: 9000
+      targetPort: 9000
+    selector:
+      name: ${PHPFPM_SERVICE_NAME}
+
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      description: Keeps track of changes in the application image
+    name: ${PHPFPM_SERVICE_NAME}
+    lables:
+      app: ${APPLICATION_NAME}
+
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      description: Defines how to build php-fpm
+      template.alpha.openshift.io/wait-for-ready: "true"
+    name: ${PHPFPM_SERVICE_NAME}
+    lables:
+      app: ${APPLICATION_NAME}
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${PHPFPM_SERVICE_NAME}:${IMG_TAG}
+    source:
+      git:
+        ref: ${SOURCE_REPOSITORY_REF}
+        uri: ${SOURCE_REPOSITORY_URL}
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: DockerImage
+          name: ${PHPFPM_IMAGE}
+        forcePull: true
+      type: Source
+    triggers:
+    - type: ConfigChange
+    - type: ImageChange
+    - type: "GitHub"
+      github:
+        secret: "${GITHUB_WEBHOOK_SECRET}"
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      description: Defines how to deploy the application server
+      template.alpha.openshift.io/wait-for-ready: "true"
+    name: ${PHPFPM_SERVICE_NAME}
+    labels:
+      app: ${APPLICATION_NAME}
+  spec:
+    replicas: 1
+    selector:
+      app: ${APPLICATION_NAME}
+      name: ${PHPFPM_SERVICE_NAME}
+    strategy:
+      type: Rolling
+      rollingParams:
+        updatePeriodSeconds: 1
+        intervalSeconds: 1
+        timeoutSeconds: 120
+        maxSurge: "25%"
+        maxUnavailable: "50%"
+    template:
+      metadata:
+        labels:
+          name: ${PHPFPM_SERVICE_NAME}
+          app: ${APPLICATION_NAME}
+        name: ${PHPFPM_SERVICE_NAME}
+      spec:
+        containers:
+          env:
+            - name: MYSQL_SETUP
+              value: ${MYSQL_DB_SETUP}
+            - name: MYSQL_SETUP_LOC
+              value: ${MYSQL_DB_SETUP_LOC}
+            - name: MYSQL_NAME
+              value: ${MYSQL_NAME}
+            - name: MYSQL_USER
+              value: ${MYSQL_DB_USER}
+            - name: MYSQL_PASSWORD
+              value: ${MYSQL_DB_PASS}
+            - name: MYSQL_ROOT_PASSWORD
+              value: ${MYSQL_DB_ROOT_PASS}
+            - name: MYSQL_DATABASE
+              value: ${MYSQL_DB_NAME}
+          image: ${PHPFPM_IMAGE}
+          name: ${PHPFPM_SERVICE_NAME}
+          ports:
+          - containerPort: 9000
+          resources:
+            limits:
+              memory: ${MEMORY_PHPFPM_LIMIT}
+          livenessProbe:
+            tcpSocket:
+              port: 9000
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ${PHPFPM_SERVICE_NAME}
+        from:
+          kind: ImageStreamTag
+          name: ${PHPFPM_SERVICE_NAME}:${IMG_TAG}
+      type: ImageChange
+    - type: ConfigChange
+
+
+
+
+#######################
+## Database Service
+#######################
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      template.alpha.openshift.io/wait-for-ready: 'true'
+    labels:
+      app: ${APPLICATION_NAME}
+      template: mariadb-persistent-template
+    name: ${MYSQL_NAME}
+  spec:
+    replicas: 1
+    selector:
+      name: ${MYSQL_NAME}
+    strategy:
+      activeDeadlineSeconds: 21600
+      recreateParams:
+        timeoutSeconds: 600
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          name: ${MYSQL_NAME}
+      spec:
+        containers:
+          - env:
+              - name: MYSQL_USER
+                value: ${MYSQL_DB_USER}
+              - name: MYSQL_PASSWORD
+                value: ${MYSQL_DB_PASS}
+              - name: MYSQL_ROOT_PASSWORD
+                value: ${MYSQL_DB_ROOT_PASS}
+              - name: MYSQL_DATABASE
+                value: ${MYSQL_DB_NAME}
+            image: >-
+              registry.access.redhat.com/rhscl/mariadb-101-rhel7@sha256:4b9189927565d6bc8eba3af56793525636e7156b8f9dac54630b832df8e4b925
+            imagePullPolicy: IfNotPresent
+            livenessProbe:
+              failureThreshold: 3
+              initialDelaySeconds: 30
+              periodSeconds: 10
+              successThreshold: 1
+              tcpSocket:
+                port: 3306
+              timeoutSeconds: 1
+            name: mariadb
+            ports:
+              - containerPort: 3306
+                protocol: TCP
+            readinessProbe:
+              exec:
+                command:
+                  - /bin/sh
+                  - '-i'
+                  - '-c'
+                  - >-
+                    MYSQL_PWD="$MYSQL_PASSWORD" mysql -h 127.0.0.1 -u $MYSQL_USER
+                    -D $MYSQL_DATABASE -e 'SELECT 1'
+              failureThreshold: 3
+              initialDelaySeconds: 5
+              periodSeconds: 10
+              successThreshold: 1
+              timeoutSeconds: 1
+            resources:
+              limits:
+                memory: 512Mi
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+            volumeMounts:
+              - mountPath: /var/lib/mysql/data
+                name: ${MYSQL_NAME}-data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+          - emptyDir: {}
+            name: ${MYSQL_NAME}-data
+    test: false
+    triggers:
+      - imageChangeParams:
+          automatic: true
+          containerNames:
+            - mariadb
+          from:
+            kind: ImageStreamTag
+            name: 'mariadb:10.1'
+            namespace: openshift
+          lastTriggeredImage: >-
+            registry.access.redhat.com/rhscl/mariadb-101-rhel7@sha256:4b9189927565d6bc8eba3af56793525636e7156b8f9dac54630b832df8e4b925
+        type: ImageChange
+      - type: ConfigChange
+
+
+
+
+
+
+parameters:
+- description: Application Name
+  displayName: Application Name
+  name: APPLICATION_NAME
+  required: true
+- description: The exposed hostname that will route to the nginx-and-php-fpm service, if left
+    blank a value will be defaulted.
+  displayName: Application Hostname
+  name: APPLICATION_DOMAIN
+
+- description: The OpenShift Namespace where the ImageStream resides.
+  displayName: Namespace
+  name: NAMESPACE
+  required: true
+  value: openshift
+
+- description: Maximum amount of memory the nginx container can use.
+  displayName: Memory Limit
+  name: MEMORY_LIMIT
+  required: true
+  value: 128Mi
+- description: Maximum amount of memory the php-fpm container can use.
+  displayName: Memory Limit (PHP-FPM)
+  name: MEMORY_PHPFPM_LIMIT
+  required: true
+  value: 128Mi
+
+- description: The URL of the repository with your application source code.
+  displayName: Git Repository URL
+  name: SOURCE_REPOSITORY_URL
+  required: true
+  value: https://github.com/ferrymanders/demo-site.git
+- description: Set this to a branch name, tag or other ref of your repository if you
+    are not using the default branch.
+  displayName: Git Reference
+  name: SOURCE_REPOSITORY_REF
+- description: Github trigger secret.  A difficult to guess string encoded as part
+    of the webhook URL.  Not encrypted.
+  displayName: GitHub Webhook Secret
+  from: '[a-zA-Z0-9]{40}'
+  generate: expression
+  name: GITHUB_WEBHOOK_SECRET
+
+- displayName: NGINX Service Name
+  name: NGINX_SERVICE_NAME
+  required: true
+  value: nginx
+- displayName: PHP-FPM Service Name
+  name: PHPFPM_SERVICE_NAME
+  required: true
+  value: php-fpm
+- displayName: NGINX Build Image
+  name: NGINX_IMAGE
+  required: true
+  value: npoict/demo:nginx
+- displayName: PHP-FPM Build Image
+  name: PHPFPM_IMAGE
+  required: true
+  value: npoict/demo:php-fpm
+- displayName: ImageStream Tag
+  name: IMG_TAG
+  required: true
+  value: latest
+
+- displayName: Database Hostname
+  name: MYSQL_NAME
+  from: 'mysqldb-[a-z0-9]{4}'
+  generate: expression
+- displayName: Database User
+  name: MYSQL_DB_USER
+  from: 'user[a-zA-Z0-9]{4}'
+  generate: expression
+- displayName: Database Password
+  name: MYSQL_DB_PASS
+  from: '[a-zA-Z0-9]{16}'
+  generate: expression
+- displayName: Database Name
+  name: MYSQL_DB_NAME
+  required: true
+  value: sampledb
+- displayName: Database root password
+  name: MYSQL_DB_ROOT_PASS
+  from: '[a-zA-Z0-9]{16}'
+  generate: expression
+
+- displayName: Setup MySQL from backup (set to YES to setup)
+  name: MYSQL_DB_SETUP
+  value: NO
+- displayName: Setup MySQL from backup (set to YES to setup)
+  name: MYSQL_DB_SETUP_LOC

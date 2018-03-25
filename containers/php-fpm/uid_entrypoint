@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# This script makes sure that applications will run under the
+# arbitrary uid's given by OpenShift
+
+if ! whoami &> /dev/null; then
+  if [ -w /etc/passwd ]; then
+    echo "${USER_NAME:-default}:x:$(id -u):0:${USER_NAME:-default} user:${HOME}:/sbin/nologin" >> /etc/passwd
+  fi
+fi
+exec "$@"

@@ -1,0 +1,26 @@
+#!/bin/sh -e
+
+set +x
+
+# Setup database info
+sed -i "s/DB_NAME_TAG/$MYSQL_DATABASE/" /e/ap/site/pages/wp-config.php
+sed -i "s/DB_USER_TAG/$MYSQL_USER/" /e/ap/site/pages/wp-config.php
+sed -i "s/DB_PASSWORD_TAG/$MYSQL_PASSWORD/" /e/ap/site/pages/wp-config.php
+sed -i "s/DB_HOST_TAG/$MYSQL_NAME/" /e/ap/site/pages/wp-config.php
+
+
+if [[ "$MYSQL_SETUP" == "YES" ]];
+then
+  echo "---> Waiting for mysql host to become active"
+  while ! mysqladmin ping -h"$MYSQL_NAME" --silent; do
+    echo -n "."
+    sleep 1
+  done
+  echo ""
+  echo "---> mysql host became active, setting up database"
+  gzip -d /e/ap/site/tmp/database.sql.gz
+  mysql -h $MYSQL_NAME -u $MYSQL_USER -p${MYSQL_PASSWORD} $MYSQL_DATABASE < /e/ap/site/tmp/database.sql
+  echo "---> database setup done, starting php-fpm"
+fi
+
+exec php-fpm
