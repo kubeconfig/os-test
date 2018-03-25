@@ -482,4 +482,3 @@ parameters:
 
 - displayName: Setup MySQL from backup (set to YES to setup)
   name: MYSQL_DB_SETUP
-  value: NO
