@@ -7,7 +7,7 @@ kind: Template
 labels:
   template: hosting-wordpress
 message: |-
-  The following service(s) have been created in your project: ${NGINX_SERVICE_NAME}, ${PHPFPM_SERVICE_NAME}.
+  The following service(s) have been created in your project: ${APPLICATION_NAME}-nginx, ${APPLICATION_NAME}-phpfpm.
 
   For more information about using this template, including OpenShift considerations, bad luck! ik ben lui.
 metadata:
@@ -24,35 +24,37 @@ metadata:
     template.openshift.io/provider-display-name: NPO ICT
     template.openshift.io/support-url: https://Whelp.npoict.nl
   name: "hosting-wordpress"
-  
+
 objects:
 - apiVersion: v1
   kind: Service
   metadata:
     annotations:
       description: Exposes and load balances the application pods
-      service.alpha.openshift.io/dependencies: '[{"name": "${PHPFPM_SERVICE_NAME}",
+      service.alpha.openshift.io/dependencies: '[{"name": "${APPLICATION_NAME}-phpfpm",
         "kind": "Service"}]'
-    name: ${NGINX_SERVICE_NAME}
+    name: ${APPLICATION_NAME}-nginx
+    lables:
+      app: ${APPLICATION_NAME}
   spec:
     ports:
     - name: web
       port: 8080
       targetPort: 8080
     selector:
-      name: ${NGINX_SERVICE_NAME}
+      name: ${APPLICATION_NAME}-nginx
 - apiVersion: v1
   kind: Route
   metadata:
     annotations:
       template.openshift.io/expose-uri: http://{.spec.host}{.spec.path}
-    name: ${NGINX_SERVICE_NAME}
+    name: ${APPLICATION_NAME}-nginx
   spec:
     host: ${APPLICATION_DOMAIN}
     to:
       kind: Service
-      name: ${NGINX_SERVICE_NAME}
-      
+      name: ${APPLICATION_NAME}-nginx
+
 #######################
 ## NGiNX Service
 #######################
@@ -61,22 +63,24 @@ objects:
   metadata:
     annotations:
       description: Keeps track of changes in the application image
-    name: ${NGINX_SERVICE_NAME}
+    name: ${APPLICATION_NAME}-nginx
     lables:
       app: ${APPLICATION_NAME}
-    
+
 - apiVersion: v1
   kind: BuildConfig
   metadata:
     annotations:
       description: Defines how to build the application
       template.alpha.openshift.io/wait-for-ready: "true"
-    name: ${NGINX_SERVICE_NAME}
+    name: ${APPLICATION_NAME}-nginx
+    lables:
+      app: ${APPLICATION_NAME}
   spec:
     output:
       to:
         kind: ImageStreamTag
-        name: ${NGINX_SERVICE_NAME}:latest
+        name: ${APPLICATION_NAME}-nginx:${IMG_TAG}
     source:
       git:
         ref: ${SOURCE_REPOSITORY_REF}
@@ -90,7 +94,7 @@ objects:
         forcePull: true
         env:
           - name: FPM
-            value: "${PHPFPM_SERVICE_NAME}"
+            value: "${APPLICATION_NAME}-phpfpm"
       type: Source
     triggers:
     - type: ConfigChange
@@ -98,36 +102,36 @@ objects:
     - type: "GitHub"
       github:
         secret: "${GITHUB_WEBHOOK_SECRET}"
-        
+
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
     annotations:
       description: Defines how to deploy the application server
       template.alpha.openshift.io/wait-for-ready: "true"
-    name: ${NGINX_SERVICE_NAME}
+    name: ${APPLICATION_NAME}-nginx
     labels:
       app: ${APPLICATION_NAME}
   spec:
     replicas: 1
     selector:
       app: ${APPLICATION_NAME}
-      name: ${NGINX_SERVICE_NAME}
+      name: ${APPLICATION_NAME}-nginx
     strategy:
       type: Recreate
     template:
       metadata:
         labels:
-          name: ${NGINX_SERVICE_NAME}
+          name: ${APPLICATION_NAME}-nginx
           app: ${APPLICATION_NAME}
-        name: ${NGINX_SERVICE_NAME}
+        name: ${APPLICATION_NAME}-nginx
       spec:
         containers:
         - env:
           - name: PHPFPM_SERVICE_NAME
-            value: ${PHPFPM_SERVICE_NAME}
+            value: ${APPLICATION_NAME}-phpfpm
           image: ${NGINX_IMAGE}
-          name: ${NGINX_SERVICE_NAME}
+          name: ${APPLICATION_NAME}-nginx
           ports:
           - containerPort: 8080
           resources:
@@ -143,13 +147,13 @@ objects:
     - imageChangeParams:
         automatic: true
         containerNames:
-        - ${NGINX_SERVICE_NAME}
+        - ${APPLICATION_NAME}-nginx
         from:
           kind: ImageStreamTag
-          name: ${NGINX_SERVICE_NAME}:latest
+          name: ${APPLICATION_NAME}-nginx:${IMG_TAG}
       type: ImageChange
     - type: ConfigChange
-    
+
 #######################
 ## PHP-FPM Service
 #######################
@@ -158,36 +162,40 @@ objects:
   metadata:
     annotations:
       description: Exposes the PHP-FPM server
-    name: ${PHPFPM_SERVICE_NAME}
+    name: ${APPLICATION_NAME}-phpfpm
+    lables:
+      app: ${APPLICATION_NAME}
   spec:
     ports:
     - name: phpfpm
       port: 9000
       targetPort: 9000
     selector:
-      name: ${PHPFPM_SERVICE_NAME}
-      
+      name: ${APPLICATION_NAME}-phpfpm
+
 - apiVersion: v1
   kind: ImageStream
   metadata:
     annotations:
       description: Keeps track of changes in the application image
-    name: ${PHPFPM_SERVICE_NAME}
+    name: ${APPLICATION_NAME}-phpfpm
     lables:
       app: ${APPLICATION_NAME}
-    
+
 - apiVersion: v1
   kind: BuildConfig
   metadata:
     annotations:
       description: Defines how to build php-fpm
       template.alpha.openshift.io/wait-for-ready: "true"
-    name: ${PHPFPM_SERVICE_NAME}
+    name: ${APPLICATION_NAME}-phpfpm
+    lables:
+      app: ${APPLICATION_NAME}
   spec:
     output:
       to:
         kind: ImageStreamTag
-        name: ${PHPFPM_SERVICE_NAME}:latest
+        name: ${APPLICATION_NAME}-phpfpm:${IMG_TAG}
     source:
       git:
         ref: ${SOURCE_REPOSITORY_REF}
@@ -206,77 +214,95 @@ objects:
     - type: "GitHub"
       github:
         secret: "${GITHUB_WEBHOOK_SECRET}"
-    
+
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
     annotations:
       description: Defines how to deploy the application server
       template.alpha.openshift.io/wait-for-ready: "true"
-    name: ${PHPFPM_SERVICE_NAME}
+    name: ${APPLICATION_NAME}-phpfpm
     labels:
       app: ${APPLICATION_NAME}
   spec:
     replicas: 1
     selector:
       app: ${APPLICATION_NAME}
-      name: ${PHPFPM_SERVICE_NAME}
+      name: ${APPLICATION_NAME}-phpfpm
     strategy:
       type: Rolling
       rollingParams:
-        updatePeriodSeconds: 1 
-        intervalSeconds: 1 
-        timeoutSeconds: 120 
-        maxSurge: "25%" 
-        maxUnavailable: "50%" 
+        updatePeriodSeconds: 1
+        intervalSeconds: 1
+        timeoutSeconds: 120
+        maxSurge: "25%"
+        maxUnavailable: "50%"
     template:
       metadata:
         labels:
-          name: ${PHPFPM_SERVICE_NAME}
+          name: ${APPLICATION_NAME}-phpfpm
           app: ${APPLICATION_NAME}
-        name: ${PHPFPM_SERVICE_NAME}
+        name: ${APPLICATION_NAME}-phpfpm
       spec:
         containers:
-        - env:
-          image: ${PHPFPM_IMAGE}
-          name: ${PHPFPM_SERVICE_NAME}
-          ports:
-          - containerPort: 9000
-          resources:
-            limits:
-              memory: ${MEMORY_PHPFPM_LIMIT}
-          livenessProbe:
-            tcpSocket:
-              port: 9000
-            initialDelaySeconds: 15
-            timeoutSeconds: 1
+          - env:
+            - name: MYSQL_SETUP
+              value: ${MYSQL_DB_SETUP}
+            - name: MYSQL_NAME
+              value: ${MYSQL_NAME}
+            - name: MYSQL_USER
+              value: ${MYSQL_DB_USER}
+            - name: MYSQL_PASSWORD
+              value: ${MYSQL_DB_PASS}
+            - name: MYSQL_ROOT_PASSWORD
+              value: ${MYSQL_DB_ROOT_PASS}
+            - name: MYSQL_DATABASE
+              value: ${MYSQL_DB_NAME}
+            image: ${PHPFPM_IMAGE}
+            name: ${APPLICATION_NAME}-phpfpm
+            ports:
+            - containerPort: 9000
+            resources:
+              limits:
+                memory: ${MEMORY_PHPFPM_LIMIT}
+            livenessProbe:
+              tcpSocket:
+                port: 9000
+              initialDelaySeconds: 15
+              timeoutSeconds: 1
     triggers:
     - imageChangeParams:
         automatic: true
         containerNames:
-        - ${PHPFPM_SERVICE_NAME}
+        - ${APPLICATION_NAME}-phpfpm
         from:
           kind: ImageStreamTag
-          name: ${PHPFPM_SERVICE_NAME}:latest
+          name: ${APPLICATION_NAME}-phpfpm:${IMG_TAG}
       type: ImageChange
     - type: ConfigChange
-    
-    
+
+
+
+
+
+
+
 parameters:
 - description: Application Name
   displayName: Application Name
   name: APPLICATION_NAME
   required: true
-- description: The name assigned to all of the frontend objects defined in this template.
-  displayName: Name
-  name: NAME
-  required: true
-  value: nginx
+- description: The exposed hostname that will route to the nginx-and-php-fpm service, if left
+    blank a value will be defaulted.
+  displayName: Application Hostname
+  name: APPLICATION_DOMAIN
+
 - description: The OpenShift Namespace where the ImageStream resides.
   displayName: Namespace
   name: NAMESPACE
   required: true
   value: openshift
+
 - description: Maximum amount of memory the nginx container can use.
   displayName: Memory Limit
   name: MEMORY_LIMIT
@@ -287,38 +313,48 @@ parameters:
   name: MEMORY_PHPFPM_LIMIT
   required: true
   value: 128Mi
+
 - description: The URL of the repository with your application source code.
   displayName: Git Repository URL
   name: SOURCE_REPOSITORY_URL
   required: true
-  value: https://github.com/ferrymanders/demo-site.git
+  value: https://github.com/ferrymanders/os-test.git
 - description: Set this to a branch name, tag or other ref of your repository if you
     are not using the default branch.
   displayName: Git Reference
   name: SOURCE_REPOSITORY_REF
-- description: The exposed hostname that will route to the nginx-and-php-fpm service, if left
-    blank a value will be defaulted.
-  displayName: Application Hostname
-  name: APPLICATION_DOMAIN
 - description: Github trigger secret.  A difficult to guess string encoded as part
     of the webhook URL.  Not encrypted.
   displayName: GitHub Webhook Secret
   from: '[a-zA-Z0-9]{40}'
   generate: expression
   name: GITHUB_WEBHOOK_SECRET
-- displayName: NGINX Service Name
-  name: NGINX_SERVICE_NAME
-  required: true
-  value: nginx
-- displayName: PHP-FPM Service Name
-  name: PHPFPM_SERVICE_NAME
-  required: true
-  value: php-fpm
+
 - displayName: NGINX Build Image
   name: NGINX_IMAGE
   required: true
-  value: npoict/demo:nginx
+  value: npoict/os-test:nginx
 - displayName: PHP-FPM Build Image
   name: PHPFPM_IMAGE
   required: true
-  value: npoict/demo:php-fpm
+  value: npoict/os-test:php-fpm2
+- displayName: ImageStream Tag
+  name: IMG_TAG
+  required: true
+  value: latest
+
+- displayName: Database Hostname
+  name: MYSQL_NAME
+  required: true
+- displayName: Database User
+  name: MYSQL_DB_USER
+  required: true
+- displayName: Database Password
+  name: MYSQL_DB_PASS
+  required: true
+- displayName: Database Name
+  name: MYSQL_DB_NAME
+  required: true
+
+- displayName: Setup MySQL from backup (set to YES to setup)
+  name: MYSQL_DB_SETUP
