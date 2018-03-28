@@ -6,6 +6,8 @@ pipeline {
         sh '''# OC Login
 oc login ${oc_api} --token=${oc_token} --insecure-skip-tls-verify
 '''
+        sh '''# Build image
+oc start-build test-nginx --from-dir=containers/nginx --commit=v2 -n ${namespace}'''
         sh '''# Build
 export ENV=test
 export TAG="${ENV}"
