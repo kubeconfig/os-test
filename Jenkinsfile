@@ -4,7 +4,7 @@ pipeline {
     stage('test') {
       steps {
         sh '''# OC Login
-#oc login ${oc_api} --token=${oc_token} --insecure-skip-tls-verify
+oc login ${oc_api} --token=${oc_token} --insecure-skip-tls-verify
 '''
         sh '''# Build image
 oc start-build test-nginx --from-dir=containers/nginx --commit=v2 -n ${namespace}'''
@@ -41,7 +41,7 @@ oc delete all -l app=${ENV}-${app}-${BUILD_NUMBER} -n ${namespace}
   }
   environment {
     app = 'een-random-app'
-    oc_token = 'eTUQIcEFbJ6OvIS6uP3wdr0FJ-empTR3hsJEMe9GElI'
+    oc_token = 'onDLOW4-0XjOYphX4P5Fs5JWbt-1IBLotGL7WsHfqkg'
     oc_api = 'https://openshift-master.nosopenshifttest.os.nos.aws.npocloud.nl:8443'
     namespace = 'foo-test2'
     template = 'templates/mysql-template.yaml'
