@@ -44,7 +44,7 @@ oc delete all -l app=${ENV}-${app}-${BUILD_NUMBER} -n ${namespace}
     app = 'een-random-app'
     oc_token = 'onDLOW4-0XjOYphX4P5Fs5JWbt-1IBLotGL7WsHfqkg'
     oc_api = 'https://openshift-master.nosopenshifttest.os.nos.aws.npocloud.nl:8443'
-    namespace = 'test'
+    namespace = 'test2'
     template = 'templates/mysql-template.yaml'
     github_repo = 'https://github.com/ferrymanders/os-test.git'
   }
