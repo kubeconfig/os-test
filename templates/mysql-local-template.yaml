@@ -273,7 +273,7 @@ objects:
               value: ${MYSQL_DB_NAME}
             image: ${PHPFPM_IMAGE}
             volumeMounts:
-              - mountPath: "/data"
+            - mountPath: "/data"
               name: php-local
             name: ${APPLICATION_NAME}-phpfpm
             ports:
