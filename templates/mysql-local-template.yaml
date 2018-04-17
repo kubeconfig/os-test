@@ -37,7 +37,8 @@ objects:
     resources:
       requests:
         storage: 1Gi 
-    storageClassName: local-storage
+    storageClassName: slow
+    hostPath: /Users/ferry/.openshift/data/volumes/php-local
 
 - apiVersion: v1
   kind: Service
