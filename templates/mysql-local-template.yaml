@@ -286,10 +286,10 @@ objects:
                 port: 9000
               initialDelaySeconds: 15
               timeoutSeconds: 1
-      volumes:
-      - name: "php-local"
-        persistentVolumeClaim:
-          claimName: "php-local"
+        volumes:
+        - name: "php-local"
+          persistentVolumeClaim:
+            claimName: "php-local"
     triggers:
     - imageChangeParams:
         automatic: true
