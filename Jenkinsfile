@@ -1,7 +1,7 @@
 pipeline {
   agent any
   stages {
-    stage('deploy test') {
+    stage('deploy testing') {
       steps {
         sh '''# Build
 export ENV=test
@@ -21,7 +21,7 @@ oc delete all -l app=${ENV}-${app}-${BUILD_NUMBER} -n ${namespace}'''
         input 'Test is removed. Continue to Staging ?'
       }
     }
-    stage('stage') {
+    stage('deploy staging') {
       steps {
         sh '''# Build
 export ENV=staging
