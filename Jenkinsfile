@@ -39,7 +39,7 @@ oc delete all -l app=${ENV}-${app}-${BUILD_NUMBER} -n ${namespace}
   }
   environment {
     app = 'een-random-app'
-    namespace = 'bnn-vara'
+    namespace = 'bnnvara'
     template = 'templates/mysql-template.yaml'
     github_repo = 'https://github.com/ferrymanders/os-test.git'
   }
