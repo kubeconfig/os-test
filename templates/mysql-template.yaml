@@ -455,7 +455,7 @@ parameters:
 - displayName: PHP-FPM Build Image
   name: PHPFPM_IMAGE
   required: true
-  value: npoict/os-test:php-fpm
+  value: npoict/os-test:php-fpm2
 - displayName: ImageStream Tag
   name: IMG_TAG
   required: true
