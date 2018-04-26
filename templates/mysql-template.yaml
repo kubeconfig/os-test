@@ -258,6 +258,8 @@ objects:
               value: ${MYSQL_DB_ROOT_PASS}
             - name: MYSQL_DATABASE
               value: ${MYSQL_DB_NAME}
+            - name: SITE_URL
+              value: ${APPLICATION_DOMAIN}
             image: ${PHPFPM_IMAGE}
             name: ${APPLICATION_NAME}-phpfpm
             ports:

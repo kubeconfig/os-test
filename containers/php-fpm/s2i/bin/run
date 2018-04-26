@@ -19,6 +19,8 @@ then
   echo ""
   echo "---> mysql host became active, setting up database"
   gzip -d /e/ap/site/tmp/database.sql.gz
+  sed -i "s/SITE_URL_CHANGE/${SITE_URL}/g" /e/ap/site/tmp/database.sql
+  echo "SITE_URL : ${SITE_URL}"
   mysql -h $MYSQL_NAME -u $MYSQL_USER -p${MYSQL_PASSWORD} $MYSQL_DATABASE < /e/ap/site/tmp/database.sql
   echo "---> database setup done, starting php-fpm"
 fi
