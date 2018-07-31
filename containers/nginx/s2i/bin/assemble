@@ -13,7 +13,7 @@ if [[ "$FPM" == "" ]]; then
 	export FPM=php-fpm;
 fi
 echo "---> Setting php backend to : $FPM"
-sed -i -- 's#PHPFPM_BACKEND#'"${FPM}"'#g' /etc/nginx/nginx.conf
+sed -i -- 's#PHPFPM_BACKEND#'"${FPM}"'#g' /e/wb/ostest1/conf/vhosts/wordpress.vhost
 
 
 ##################

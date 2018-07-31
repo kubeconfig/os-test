@@ -16,13 +16,16 @@ COPY ./s2i/bin/ /usr/libexec/s2i
 
 COPY config/nginx.conf /etc/nginx/
 
-RUN mkdir -p /e/ap/site/tmp /e/ap/site/pages /e/ap/site/logs && \
-	chown -R 1001:0 /e/ap/site/tmp /e/ap/site/pages /e/ap/site/logs && \
-	chmod ug+rwx /e/ap/site/tmp /e/ap/site/pages /e/ap/site/logs && \
-	chmod ug+rw /etc/nginx/nginx.conf && \
-	chown -R 1001:0 /etc/nginx
+# Appcluster paden aanmaken
+RUN mkdir -p /e/ap/site/tmp /e/ap/site/pages /e/ap/site/logs /e/wb/ostest1/conf/vhosts/ && \
+	chown -R 1001:0 /e/ap/site/tmp /e/ap/site/pages /e/ap/site/logs /etc/nginx /e/wb/ostest1/conf/&& \
+# Permissies _bijna_ goed zetten	
+	chmod u+rwx /e/ap/site/tmp /e/ap/site/pages /e/ap/site/logs && \
+	chmod u+rw /etc/nginx/nginx.conf && 
 
 COPY ./uid_entrypoint /bin/uid_entrypoint
+
+COPY config/wordpress.vhost /e/wb/ostest1/conf/vhosts/
 
 RUN chmod a+x /usr/libexec/s2i/* /bin/uid_entrypoint
 
