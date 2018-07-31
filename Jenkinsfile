@@ -41,6 +41,6 @@ oc delete all -l app=${ENV}-${app}-${BUILD_NUMBER} -n ${namespace}
     app = 'tim-app'
     namespace = 'tim'
     template = 'templates/mysql-template.yaml'
-    github_repo = 'git@github.com:tsterk/os-test.git'
+    github_repo = 'https://github.com/tsterk/os-test.git'
   }
 }
