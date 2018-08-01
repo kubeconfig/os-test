@@ -17,11 +17,12 @@ COPY ./s2i/bin/ /usr/libexec/s2i
 COPY config/nginx.conf /etc/nginx/
 
 # Appcluster paden aanmaken
-# Permissies _bijna_ goed zetten	
+# Permissies _bijna_ goed zetten, notice de ug+rw op site/tmp, 
+# helaas werkt het nog niet beter (minder rechten)	
 RUN mkdir -p /e/ap/site/tmp /e/ap/site/pages /e/ap/site/logs /e/wb/ostest1/conf/vhosts && \
 	chown -R 1001:0 /e/ap/site/tmp /e/ap/site/pages /e/ap/site/logs /etc/nginx /e/wb/ostest1/conf && \
-	chmod u+rwx /e/ap/site/tmp /e/ap/site/pages /e/ap/site/logs && \
-	chmod u+rw /etc/nginx/nginx.conf  
+	chmod ug+rwx /e/ap/site/tmp /e/ap/site/pages /e/ap/site/logs && \
+	chmod ug+rw /etc/nginx/nginx.conf  
 
 COPY ./uid_entrypoint /bin/uid_entrypoint
 
