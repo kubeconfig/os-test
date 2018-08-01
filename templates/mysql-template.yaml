@@ -451,7 +451,7 @@ parameters:
 - displayName: NGINX Build Image
   name: NGINX_IMAGE
   required: true
-  value: npoict/os-test:nginx
+  value: kubeconfig/nginx-custom:latest
 - displayName: PHP-FPM Build Image
   name: PHPFPM_IMAGE
   required: true

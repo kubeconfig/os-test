@@ -1,4 +1,4 @@
-FROM nginx:1.13-alpine
+FROM nginx:mainline-alpine
 
 MAINTAINER "NPO ICT" <hosting@npo.nl>
 
@@ -17,11 +17,11 @@ COPY ./s2i/bin/ /usr/libexec/s2i
 COPY config/nginx.conf /etc/nginx/
 
 # Appcluster paden aanmaken
-RUN mkdir -p /e/ap/site/tmp /e/ap/site/pages /e/ap/site/logs /e/wb/ostest1/conf/vhosts/ && \
-	chown -R 1001:0 /e/ap/site/tmp /e/ap/site/pages /e/ap/site/logs /etc/nginx /e/wb/ostest1/conf/&& \
 # Permissies _bijna_ goed zetten	
+RUN mkdir -p /e/ap/site/tmp /e/ap/site/pages /e/ap/site/logs /e/wb/ostest1/conf/vhosts && \
+	chown -R 1001:0 /e/ap/site/tmp /e/ap/site/pages /e/ap/site/logs /etc/nginx /e/wb/ostest1/conf && \
 	chmod u+rwx /e/ap/site/tmp /e/ap/site/pages /e/ap/site/logs && \
-	chmod u+rw /etc/nginx/nginx.conf && 
+	chmod u+rw /etc/nginx/nginx.conf  
 
 COPY ./uid_entrypoint /bin/uid_entrypoint
 
