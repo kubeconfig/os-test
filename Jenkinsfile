@@ -38,7 +38,7 @@ oc delete all -l app=${ENV}-${app}-${BUILD_NUMBER} -n ${namespace}
     }
   }
   environment {
-    app = 'spin-app-custom'
+    app = 'spinning-rims'
     namespace = 'ops-pin'
     template = 'templates/mysql-template.yaml'
     github_repo = 'https://github.com/kubeconfig/os-test.git'
